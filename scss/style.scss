@@ -1,0 +1,858 @@
+@import 'bourbon'; // http://bourbon.io/
+
+@import '../partials/variables'; // colors, fonts etc...
+
+@import '../partials/mixins'; // custom mixins
+
+@import '../partials/layout'; // responsive grid and media queries
+
+/* -------------------------------- 
+
+Primary style
+
+-------------------------------- */
+
+*, *::after, *::before {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 62.5%;
+}
+
+body {
+	font: {
+		size: 1.6rem;
+		family: $primary-font; // variables inside partials > _variables.scss
+	}
+	color: $color-1;
+	background-color: $color-3;
+}
+
+a {
+	color: $color-2;
+	text-decoration: none;
+}
+
+img {
+	max-width: 100%;
+}
+
+input {
+	font-family: $primary-font;
+	font-size: 1.6rem;
+}
+
+/* remove “X” from search input field */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
+input[type=text]::-ms-clear {  display: none; width : 0; height: 0; }
+input[type=text]::-ms-reveal {  display: none; width : 0; height: 0; }
+
+/* -------------------------------- 
+
+Main Components 
+
+-------------------------------- */
+
+header {
+	height: 100px;
+	background: $color-3;
+}
+
+.cd-dropdown-wrapper {
+	display: inline-block;
+	position: relative;
+	height: 40px;
+	margin: 30px 0 0 5%; 
+	@include font-smoothing;
+
+	&::before {
+		/* never visible - this is used in jQuery to check the current MQ */ 
+		content: 'mobile';
+		display: none;
+	}
+
+	@include MQ(L) {
+		&::before {
+			content: 'desktop';
+		}
+	}
+}
+
+.cd-dropdown-trigger {
+	display: block;
+	position: relative;
+	padding: 0 36px 0 20px;
+	line-height: 40px;
+	background-color: $color-1;
+	color: $color-3;
+	border-radius: 3px;
+
+	.no-touch &:hover {
+		background-color: lighten($color-1, 5%);
+	}
+
+	&::before, &::after {
+		/* this is the arrow inside the dropdown trigger*/
+		content: '';
+		position: absolute;
+		top: 50%;
+		margin-top: -1px;
+		height: 2px;
+		width: 9px;
+		background: $color-3;
+		@include backface-visibility(hidden);
+		
+		@include transition(width .3s, transform .3s);		
+	}
+
+	&::before {
+		right: 22px;
+		@include transform(rotate(45deg));
+	}
+
+	&::after {
+		right: 17px;
+		@include transform(rotate(-45deg));
+	}
+
+	@include MQ(L) {
+		font-size: 1.5rem;
+
+		&.dropdown-is-active {
+			background-color: $color-2;
+
+			.no-touch &:hover {
+				background-color: lighten($color-2, 5%);
+			}
+
+			&::before, &::after {
+				/* transform the arrow into a 'X' */
+				width: 14px;
+			}
+
+			&::before {
+				/* transform the arrow into a 'X' */
+				@include transform(translateX(5px) rotate(-45deg));
+			}
+
+			&::after {
+				/* transform the arrow into a 'X' */
+				@include transform(rotate(45deg));
+			}
+		}
+	}
+}
+
+.cd-dropdown h2, 
+.cd-dropdown-content a, 
+.cd-dropdown-content ul a {
+	height: 50px;
+	line-height: 50px;
+
+	@include MQ(M) {
+		height: 60px;
+		line-height: 60px;
+	}
+
+	@include MQ(L) {
+		height: 50px;
+		line-height: 50px;
+	}
+}
+
+.cd-dropdown h2, 
+.cd-dropdown-content a, 
+.cd-dropdown-content ul a,
+.cd-dropdown-content .cd-divider {
+	padding: 0 20px;
+}
+
+.cd-dropdown {
+	position: fixed;
+	z-index: 1;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: $color-1;
+	color: $color-3;
+	visibility: hidden;
+	
+	/* Force Hardware Acceleration */
+	@include backface-visibility(hidden);
+	@include transform(translateZ(0));
+
+	@include transform(translateY(-100%));
+	@include transition(transform .5s 0s, visibility 0s .5s);
+
+	h2 {
+		/* dropdown title - mobile version only */
+		position: relative;
+		z-index: 1;
+		color: tint($color-1, 30%);
+		background-color: $color-1;
+		border-bottom: 1px solid tint($color-1, 8%);
+	}
+
+	.cd-close {
+		/* 'X' close icon - mobile version only */
+		position: absolute;
+		z-index: 1;
+		right: 0;
+		top: 0;
+		height: 50px;
+		width: 50px;
+
+		/* image replacement */
+		overflow: hidden;
+		text-indent: 100%;
+		white-space: nowrap;
+		color: transparent;
+
+		&::after,
+		&::before {
+			/* this is the 'X' icon */
+			content: '';
+			position: absolute;
+			@include center;
+			height: 20px;
+			width: 2px;
+			background-color: $color-3;
+		}
+
+		&::after {
+			@include transform(translateX(-50%) translateY(-50%) rotate(45deg));
+		}
+
+		&::before {
+			@include transform(translateX(-50%) translateY(-50%) rotate(-45deg));
+		}
+
+	}
+
+	&.dropdown-is-active {
+		visibility: visible;
+		@include transform(translateY(0));
+		@include transition(transform .5s 0s, visibility 0s 0s);
+	}
+
+	@include MQ(M) {
+
+		.cd-close {
+			top: 5px;
+		}
+	}
+
+	@include MQ(L) {
+		position: absolute;
+		top: calc(100% - 2px);
+		/* reset style*/
+		height: auto;
+		width: auto;
+		@include transform(translateX(0));
+		background-color: $color-3;
+		color: $color-1;
+		box-shadow: 0 4px 12px rgba(#000, .1);
+		opacity: 0;
+		@include transform(translateY(30px));
+		@include transition(opacity 0.3s 0s, visibility 0s 0.3s, transform 0.3s 0s);
+
+		h2, .cd-close {
+			/* on desktop - hide title and 'X' */
+			display: none;
+		}
+
+		&.dropdown-is-active {
+			opacity: 1;
+			@include transform(translateY(0));
+			@include transition(opacity 0.3s 0s, visibility 0.3s 0s, transform 0.3s 0s);
+		}
+	}
+}
+
+.cd-dropdown-content, .cd-dropdown-content ul {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	@include transition(transform 0.3s);
+	padding-top: 50px;
+
+	a {
+		display: block;
+		color: $color-3;
+
+		/* truncate text with ellipsis if too long */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		border-top-width: 1px;
+		border-color: tint($color-1, 8%);
+		border-style: solid;
+	}
+
+	li:first-of-type > a {
+		border-top-width: 0;
+	}
+
+	li:last-of-type > a {
+		border-bottom-width: 1px;
+	}
+
+	.cd-divider {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		background-color: shade($color-1, 30%);
+		font-size: 1.1rem;
+		font-weight: bold;
+		letter-spacing: 1px;
+		color: tint($color-1, 30%);
+		text-transform: uppercase;
+	}
+
+	.cd-divider + li > a {
+		border-top-width: 0;
+	}
+
+	a, .cd-search, .cd-divider {
+		/* Force Hardware Acceleration */
+		@include transform(translateZ(0));
+		@include backface-visibility(hidden);
+
+		@include transition(opacity .3s, transform .3s);
+	}
+
+	&.is-hidden {
+		/* push the secondary dropdown items to the right */
+		@include transform(translateX(100%));
+	}
+
+	&.is-hidden > li > a,
+	&.is-hidden > li > .cd-search,
+	&.is-hidden > .cd-divider, 
+	&.move-out > li > a,
+	&.move-out > li > .cd-search,
+	&.move-out > .cd-divider {
+		/* lower down the dropdown items opacity - when secondary dropdown slides in or for dropdown items hidden on the right */
+		opacity: 0;
+	}
+
+	&.move-out > li > a,
+	&.move-out > li > .cd-search,
+	&.move-out > .cd-divider {
+		/* push the dropdown items to the left when secondary dropdown slides in */
+		@include transform(translateX(-100%));
+	}
+
+	.dropdown-is-active & {
+		-webkit-overflow-scrolling: touch;
+	}
+
+	@include MQ(M) {
+		padding-top: 60px;
+
+		a {
+			font-size: 1.8rem;
+		}
+	}
+
+	@include MQ(L) {
+		padding-top: 0;
+		overflow: visible;
+
+		a {
+			color: $color-1;
+			height: 50px;
+			line-height: 50px;
+			font-size: 1.5rem;
+			border-color: darken($color-3, 8%);
+
+			.no-touch &:hover {
+				color: $color-2;
+			}
+		}
+
+		.cd-divider {
+			background-color: transparent;
+			color: darken($color-3, 30%);
+			border-top: 1px solid darken($color-3, 8%);
+		}
+
+		.cd-divider + li > a {
+			border-top-width: 1px;
+		}
+
+		&.is-hidden > li > a,
+		&.is-hidden > li > .cd-search,
+		&.is-hidden > .cd-divider, 
+		&.move-out > li > a,
+		&.move-out > li > .cd-search,
+		&.move-out > .cd-divider {
+			/* reset mobile style */
+			opacity: 1;
+		}
+	}
+}
+
+.cd-dropdown-content {
+
+	.see-all a {
+		/* different style for the See all links */
+		color: $color-2;
+	}
+
+	.cd-dropdown-gallery .cd-dropdown-item, .cd-dropdown-icons .cd-dropdown-item {
+		/* items with picture (or icon) and title */
+		height: 80px;
+		line-height: 80px;
+
+		h3 {
+			/* truncate text with ellipsis if too long */
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.cd-dropdown-gallery .cd-dropdown-item {
+		padding-left: 90px;
+	}
+
+	.cd-dropdown-gallery img {
+		position: absolute;
+		display: block;
+		height: 40px;
+		width: auto;
+		left: 20px;
+		top: 50%;
+		margin-top: -20px;
+	}
+
+	.cd-dropdown-icons .cd-dropdown-item {
+		padding-left: 75px;
+		position: relative;
+
+		p {
+			color: $color-1;
+			font-size: 1.3rem;
+			/* hide description on small devices */
+			display: none;
+		}
+
+		&::before {
+			/* item icon */
+			content:'';
+			display: block;
+			position: absolute;
+			left: 20px;
+			top: 50%;
+			margin-top: -20px;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-size: 40px 40px;
+		}
+
+		&.item-1::before {
+			background-image: url('../img/nucleo-icon-1.svg');
+		}
+
+		&.item-2::before {
+			background-image: url('../img/nucleo-icon-2.svg');
+		}
+
+		&.item-3::before {
+			background-image: url('../img/nucleo-icon-3.svg');
+		}
+
+		&.item-4::before {
+			background-image: url('../img/nucleo-icon-4.svg');
+		}
+
+		&.item-5::before {
+			background-image: url('../img/nucleo-icon-5.svg');
+		}
+
+		&.item-6::before {
+			background-image: url('../img/nucleo-icon-6.svg');
+		}
+
+		&.item-7::before {
+			background-image: url('../img/nucleo-icon-7.svg');
+		}
+
+		&.item-8::before {
+			background-image: url('../img/nucleo-icon-8.svg');
+		}
+
+		&.item-9::before {
+			background-image: url('../img/nucleo-icon-9.svg');
+		}
+
+		&.item-10::before {
+			background-image: url('../img/nucleo-icon-10.svg');
+		}
+
+		&.item-11::before {
+			background-image: url('../img/nucleo-icon-11.svg');
+		}
+
+		&.item-12::before {
+			background-image: url('../img/nucleo-icon-12.svg');
+		}
+	}
+
+	@include MQ(L) {
+		/* reset mobile style */
+		position: static;
+		height: auto;
+		width: 280px;
+
+		> li:last-of-type a {
+			border-bottom: none;
+		}
+
+		&.move-out > li > a,
+		&.move-out > li > .cd-search,
+		&.move-out > .cd-divider {
+			/* reset mobile style */
+			@include transform(translateX(0));
+			opacity: 1;
+		}
+
+		.cd-secondary-dropdown, .cd-dropdown-gallery, .cd-dropdown-icons  {
+			@include clearfix;
+			@include transform(translateX(0));
+			left: 100%;
+			height: auto;
+			background-color: $color-3;
+			box-shadow: 0 2px 14px rgba(#000, .1);
+
+			&.is-hidden {
+				/* reset mobile style */
+				@include transform(translateX(0));
+			}
+
+			&.slide-in {
+				/* animate secondary dropdown items when hovering over of of the .cd-dropdown-content list items */
+				@include animation(cd-slide-in 0.3s);
+			}
+
+			> .go-back, > .see-all {
+				display: none;
+			}
+
+			.cd-dropdown-item, a {
+				border: none;
+			}
+		}
+
+		.cd-dropdown-gallery, .cd-dropdown-icons {
+			padding: 20px 30px;
+		}
+
+		.cd-dropdown-icons > li, .cd-secondary-dropdown > li {
+			@include column(0.5);
+		}
+
+		.cd-secondary-dropdown {
+			overflow: hidden;
+			width: 550px;
+
+			&::before {
+				/* this is the separation line in the middle of the .cd-secondary-dropdown element */
+				position: absolute;
+				content: '';
+				top: 290px;
+				left: 15px;
+				height: 1px;
+				width: 520px;
+				background-color: darken($color-3, 8%);
+			}
+
+			> li > a {
+				color: $color-2;
+				font-size: 1.6rem;
+				margin-bottom: 10px;
+				line-height: 30px;
+				height: 30px;
+				pointer-events: none;
+
+				&::after, &::before {
+					/* hide the arrow */
+					display: none;
+				}
+			}
+
+			&.move-out > li > a {
+				/* reset mobile style */
+				@include transform(translateX(0));
+			}
+
+			> li {
+				margin: 20px 0;
+				border-right-width: 1px;
+				border-color: darken($color-3, 8%);
+				border-style: solid;
+				padding: 0 30px;
+				height: 250px;
+			}
+
+			> li:nth-of-type(2n) {
+				border-right-width: 0; 
+			}
+
+			> li > ul {
+				/* reset mobile style */
+				@include transform(translate(0));
+				position: relative;
+				height: auto;
+
+				> .go-back {
+					display: none;
+				}
+			}
+
+			a {
+				line-height: 25px;
+				height: 25px;
+				font-size: 1.3rem;
+				padding-left: 0;
+			}
+
+			ul {
+				padding-bottom: 25px;
+				overflow: hidden;
+				height: auto;
+			}
+
+			.go-back a {
+				padding-left: 20px;
+				color: transparent;
+
+				.no-touch &:hover {
+					color: transparent;
+				}
+
+				&::before, &::after {
+					left: 0
+				}
+			}
+
+			.see-all {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+			}
+		}
+
+		.cd-dropdown-gallery {
+			width: 600px;
+
+			> li {
+				@include column(0.48);
+				margin-right: 4%;
+
+				&:nth-of-type(2n) {
+					margin-right: 0;
+				}
+			}	
+
+			.cd-dropdown-item {
+				padding: 0;
+				height: auto;
+				line-height: normal;
+				color: $color-2;
+				margin-bottom: 2em;
+			}
+
+			> li:nth-last-of-type(2) a,
+			> li:last-of-type a {
+				margin-bottom: 0;
+			}
+
+			img {
+				position: static;
+				height: auto;
+				width: 100%;
+				margin: 0 0 0.6em;
+			}
+		}
+
+		.cd-dropdown-icons {
+			width: 600px;
+
+			.cd-dropdown-item {
+				height: 80px;
+				line-height: 1.2;
+				padding: 24px 0 0 85px;
+
+				&:hover {
+					background: darken($color-3, 8%);
+				}
+
+				h3 {
+					color: $color-2;
+					font-weight: bold;
+				}
+
+				p {
+					display: block;
+					font-size: 1.2rem;
+				}
+
+				&::before {
+					left: 25px;
+				}
+			}
+		}
+
+		> .has-children > ul {
+			visibility: hidden;
+		}
+
+		> .has-children:hover > ul {
+			/* when hover over .cd-dropdown-content items - show subnavigation */
+			visibility: visible;
+		}
+
+		> .has-children:hover > .cd-secondary-dropdown > li > ul {
+			/* if .cd-secondary-dropdown is visible - show also subnavigation */
+			visibility: visible;
+		}
+
+		.no-touch & > .has-children:hover > a {
+			/* hover effect for .cd-dropdown-content items with subnavigation */
+			box-shadow: inset 2px 0 0 $color-2;
+			color: $color-2;
+
+			&::before,
+			&::after {
+				background: $color-2;
+			}
+		}
+	}
+}
+
+@include keyframes(cd-slide-in) {
+	0% {
+		opacity: 0;
+		@include transform(translateX(30px));
+	}
+
+	100% {
+		opacity: 1;
+		@include transform(translateX(0));
+	}
+}
+
+.cd-search input[type="search"] {
+	width: 100%;
+	height: 50px;
+	padding: 0 20px;
+	@include appearance(none);
+	background-color: tint($color-1, 8%);
+	color: $color-3;
+	border: none;
+	border-radius: 0;
+
+	@include placeholder {
+		color: $color-3;
+	}
+
+	&:focus {
+		background: $color-3;
+		color: $color-1;
+		outline: none;
+
+		@include placeholder {
+			color: rgba($color-1, .4);
+		}
+	}
+
+	@include MQ(L) {
+		background-color: darken($color-3, 8%);
+
+		@include placeholder {
+			color: darken($color-3, 30%);
+		}
+	}
+}
+
+.has-children > a, .go-back a {
+	position: relative;
+
+	&::before, &::after {
+		/* arrow icon in CSS - for element with nested unordered lists */
+		content: '';
+		position: absolute;
+		top: 50%;
+		margin-top: -1px;
+		display: inline-block;
+		height: 2px;
+		width: 10px;
+		background: $color-3;
+		@include backface-visibility(hidden);
+	}
+
+	&::before {
+		@include transform(rotate(45deg));
+	}
+
+	&::after {
+		@include transform(rotate(-45deg));
+	}
+
+	@include MQ(L) {
+
+		&::before, &::after {
+			background: darken($color-3, 30%);
+		}
+	}
+}
+
+.has-children > a {
+	padding-right: 40px;
+
+	&::before, &::after {
+		/* arrow goes on the right side - children navigation */
+		right: 20px;
+		@include transform-origin(9px 50%);
+	}
+}
+
+.cd-dropdown-content .go-back a {
+	padding-left: 40px;
+
+	&::before, &::after {
+		/* arrow goes on the left side - go back button */
+		left: 20px;
+		@include transform-origin(1px 50%);
+	}
+}
+
+.cd-main-content {
+	background-color: darken($color-3, 10%);
+	min-height: calc(100vh - 100px);
+	padding: 2em 5%;
+	line-height: 2;
+}
+
+.no-js .cd-dropdown-wrapper:hover .cd-dropdown {
+	visibility: visible;
+	opacity: 1;
+	@include transform(translateY(0));
+}
+
+.no-js .cd-dropdown-wrapper .cd-close {
+	display: none;
+}
