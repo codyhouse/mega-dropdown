@@ -10,3 +10,5 @@ A responsive and easy to customise mega-dropdown component.
 [Terms](http://codyhouse.co/terms/)
 
 Icons: [Nucleo Library](https://nucleoapp.com/)
+
+Diagonal movement plugin: [jQuery-menu-aim](https://github.com/kamens/jQuery-menu-aim)

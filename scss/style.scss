@@ -68,18 +68,6 @@ header {
 	height: 40px;
 	margin: 30px 0 0 5%; 
 	@include font-smoothing;
-
-	&::before {
-		/* never visible - this is used in jQuery to check the current MQ */ 
-		content: 'mobile';
-		display: none;
-	}
-
-	@include MQ(L) {
-		&::before {
-			content: 'desktop';
-		}
-	}
 }
 
 .cd-dropdown-trigger {
@@ -261,6 +249,12 @@ header {
 		@include transform(translateY(30px));
 		@include transition(opacity 0.3s 0s, visibility 0s 0.3s, transform 0.3s 0s);
 
+		.open-to-left & {
+			/* use the .open-to-left class if you want to open the dropdown on the left */
+			right: 0;
+			left: auto;
+		}
+
 		h2, .cd-close {
 			/* on desktop - hide title and 'X' */
 			display: none;
@@ -373,10 +367,6 @@ header {
 			line-height: 50px;
 			font-size: 1.5rem;
 			border-color: darken($color-3, 8%);
-
-			.no-touch &:hover {
-				color: $color-2;
-			}
 		}
 
 		.cd-divider {
@@ -520,6 +510,10 @@ header {
 			border-bottom: none;
 		}
 
+		.no-touch & > li:not(.has-children) a:hover {
+			color: $color-2;
+		}
+
 		&.move-out > li > a,
 		&.move-out > li > .cd-search,
 		&.move-out > .cd-divider {
@@ -535,19 +529,51 @@ header {
 			height: auto;
 			background-color: $color-3;
 			box-shadow: 0 2px 14px rgba(#000, .1);
+			
+			.open-to-left & {
+				/* use the .open-to-left class if you want to open the dropdown on the left */
+				left: auto;
+				right: 100%;
+			}
 
 			&.is-hidden {
 				/* reset mobile style */
 				@include transform(translateX(0));
 			}
 
-			&.slide-in {
+			&.fade-in {
 				/* animate secondary dropdown items when hovering over of of the .cd-dropdown-content list items */
-				@include animation(cd-slide-in 0.3s);
+				@include animation(cd-fade-in .2s);
 			}
 
-			> .go-back, > .see-all {
+			&.fade-out {
+				/* animate secondary dropdown items when hovering over of of the .cd-dropdown-content list items */
+				@include animation(cd-fade-out .2s);
+			}
+
+			> .go-back {
 				display: none;
+			}
+
+			> .see-all {
+				position: absolute;
+				bottom: 20px;
+				height: 45px;
+				text-align: center;
+
+				a {
+					margin: 0;
+					height: 100%;
+					line-height: 45px;
+					background: darken($color-3, 8%);
+					pointer-events: auto;
+					@include transition(color .2s, background-color .2s);
+
+					.no-touch &:hover {
+						color: $color-3;
+						background-color: $color-1;
+					}
+				}
 			}
 
 			.cd-dropdown-item, a {
@@ -556,7 +582,11 @@ header {
 		}
 
 		.cd-dropdown-gallery, .cd-dropdown-icons {
-			padding: 20px 30px;
+			padding: 20px 30px 100px;
+
+			> .see-all {
+				width: calc(100% - 60px);
+			}
 		}
 
 		.cd-dropdown-icons > li, .cd-secondary-dropdown > li {
@@ -566,6 +596,7 @@ header {
 		.cd-secondary-dropdown {
 			overflow: hidden;
 			width: 550px;
+			padding-bottom: 65px;
 
 			&::before {
 				/* this is the separation line in the middle of the .cd-secondary-dropdown element */
@@ -626,6 +657,10 @@ header {
 				height: 25px;
 				font-size: 1.3rem;
 				padding-left: 0;
+
+				.no-touch &:hover {
+					color: $color-2;
+				}
 			}
 
 			ul {
@@ -657,6 +692,7 @@ header {
 
 		.cd-dropdown-gallery {
 			width: 600px;
+			padding-bottom: 100px;
 
 			> li {
 				@include column(0.48);
@@ -720,17 +756,17 @@ header {
 			visibility: hidden;
 		}
 
-		> .has-children:hover > ul {
+		> .has-children > ul.is-active {
 			/* when hover over .cd-dropdown-content items - show subnavigation */
 			visibility: visible;
 		}
 
-		> .has-children:hover > .cd-secondary-dropdown > li > ul {
+		> .has-children > .cd-secondary-dropdown.is-active > li > ul {
 			/* if .cd-secondary-dropdown is visible - show also subnavigation */
 			visibility: visible;
 		}
 
-		.no-touch & > .has-children:hover > a {
+		> .has-children > a.is-active {
 			/* hover effect for .cd-dropdown-content items with subnavigation */
 			box-shadow: inset 2px 0 0 $color-2;
 			color: $color-2;
@@ -740,18 +776,34 @@ header {
 				background: $color-2;
 			}
 		}
+
+		.open-to-left & > .has-children > a.is-active {
+			box-shadow: inset -2px 0 0 $color-2;
+		}
 	}
 }
 
-@include keyframes(cd-slide-in) {
+@include keyframes(cd-fade-in) {
 	0% {
 		opacity: 0;
-		@include transform(translateX(30px));
+		visibility: visible;
 	}
 
 	100% {
 		opacity: 1;
-		@include transform(translateX(0));
+		visibility: visible;
+	}
+}
+
+@include keyframes(cd-fade-out) {
+	0% {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	100% {
+		opacity: 0;
+		visibility: visible;
 	}
 }
 
@@ -827,6 +879,20 @@ header {
 		/* arrow goes on the right side - children navigation */
 		right: 20px;
 		@include transform-origin(9px 50%);
+	}
+}
+
+@include MQ(L) {
+	
+	.open-to-left .cd-dropdown-content > .has-children > a {
+		padding-left: 40px;
+		padding-right: 20px;
+
+		&::before, &::after {
+			right: auto;
+			left: 20px;
+			@include transform-origin(1px 50%);
+		}
 	}
 }
 
