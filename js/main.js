@@ -13,8 +13,8 @@ jQuery(document).ready(function($){
 
 	//on mobile - open submenu
 	$('.has-children').children('a').on('click', function(event){
-		//prevent default clicking on direct children of .cd-dropdown-content 
-		if( $(this).parent('.has-children').parent('.cd-dropdown-content').length > 0 ) event.preventDefault();
+		//prevent default clicking on direct children of .has-children 
+		event.preventDefault();
 		var selected = $(this);
 		selected.next('ul').removeClass('is-hidden').end().parent('.has-children').parent('ul').addClass('move-out');
 	});
